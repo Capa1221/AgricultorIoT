@@ -37,12 +37,7 @@ public class EstacionController {
     })
     @GetMapping("/buscarTodos")
     public ResponseEntity<?> buscarTodos() {
-        try {
-                return hibernaderoService.buscarTodos();
-                
-        } catch (Exception e) {
-                System.out.println("Error", e);
-        }
+        return hibernaderoService.buscarTodos();
     }
 
     @Operation(summary = "Busca una estacion por su id",

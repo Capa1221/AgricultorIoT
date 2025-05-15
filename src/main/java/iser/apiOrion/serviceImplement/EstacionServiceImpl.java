@@ -81,7 +81,7 @@ public class EstacionServiceImpl implements EstacionService {
 
             return ResponseEntity.ok().body(estaciones);
         } catch (Exception e) {
-            System.out.println("Error: "+e.getMessage());
+            System.out.println("Error: "+e);
             return ResponseEntity.badRequest().build();
         }
     }
