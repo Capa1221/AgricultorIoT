@@ -79,10 +79,13 @@ public class EstacionServiceImpl implements EstacionService {
                                 ? descripcionTipoCultivo
                                 : "No se encontro el tipo de cultivo");
                 estacionDTO.setNumero_Asociados(usuarioEstacionRepository.countByIdEstacion(estacion.getId()));
-                String usuarioEncargado = Optional.ofNullable(estacion.getEncargado())
-                        .flatMap(usuarioRepository::findById)
-                        .map(Usuario::getUsuario)
-                        .orElse(null);
+                String usuarioEncargado = null;
+                String idEncargado = estacion.getEncargado();
+                if (idEncargado != null) {
+                    usuarioEncargado = usuarioRepository.findById(idEncargado)
+                                                        .map(Usuario::getUsuario)
+                                                        .orElse(null);
+                }
                 estacionDTO.setUsuarioEncargado(usuarioEncargado);
                 estaciones.add(estacionDTO);
             }
