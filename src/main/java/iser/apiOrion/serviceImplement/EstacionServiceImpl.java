@@ -60,6 +60,7 @@ public class EstacionServiceImpl implements EstacionService {
             if (estacionesList.isEmpty()) {
                 return ResponseEntity.noContent().build();
             }
+            System.out.println(estacionesList);
             estaciones = new ArrayList<>();
             for (Estacion estacion : estacionesList) {
                 EstacionDTO estacionDTO = new EstacionDTO();
