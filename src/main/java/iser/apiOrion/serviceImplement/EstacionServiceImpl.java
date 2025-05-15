@@ -3,6 +3,7 @@ package iser.apiOrion.serviceImplement;
 
 import iser.apiOrion.DTO.EstacionDTO;
 import iser.apiOrion.collection.Estacion;
+import iser.apiOrion.collection.Usuario;
 import iser.apiOrion.repository.EstacionRepository;
 import iser.apiOrion.repository.TipoCultivoRepository;
 import iser.apiOrion.repository.UsuarioEstacionRepository;
@@ -48,6 +49,7 @@ public class EstacionServiceImpl implements EstacionService {
 
     /**
      * Metodo que permite obtener todos los estaciones
+     *
      * @return lista de estaciones
      */
     @Override
@@ -59,7 +61,7 @@ public class EstacionServiceImpl implements EstacionService {
             if (estacionesList.isEmpty()) {
                 return ResponseEntity.noContent().build();
             }
-             estaciones = new ArrayList<>();
+            estaciones = new ArrayList<>();
             for (Estacion estacion : estacionesList) {
                 EstacionDTO estacionDTO = new EstacionDTO();
                 estacionDTO.setId(estacion.getId());
@@ -74,20 +76,24 @@ public class EstacionServiceImpl implements EstacionService {
                 descripcionTipoCultivo = tipoCultivoRepository.findById(estacion.getIdTipoCultivo()).get().getNombre();
                 estacionDTO.setDescripcionTipoCultivo((!Objects.equals(descripcionTipoCultivo, "") && descripcionTipoCultivo != null) ? descripcionTipoCultivo : "No se encontro el tipo de cultivo");
                 estacionDTO.setNumero_Asociados(usuarioEstacionRepository.countByIdEstacion(estacion.getId()));
-                String usuarioEncargado = usuarioRepository.findById(estacion.getEncargado()).get().getUsuario();
+                String usuarioEncargado = Optional.ofNullable(estacion.getEncargado())
+                        .flatMap(usuarioRepository::findById)
+                        .map(Usuario::getUsuario)
+                        .orElse(null);
                 estacionDTO.setUsuarioEncargado(usuarioEncargado);
                 estaciones.add(estacionDTO);
             }
 
             return ResponseEntity.ok().body(estaciones);
         } catch (Exception e) {
-            System.out.println("Error: "+e.getMessage());
+            System.out.println("Error: " + e.getMessage());
             return ResponseEntity.badRequest().build();
         }
     }
 
     /**
      * Metodo que permite obtener un estacion por su id
+     *
      * @param id id del estacion
      * @return estacion
      */
@@ -110,17 +116,23 @@ public class EstacionServiceImpl implements EstacionService {
             estacionDTO.setIdTipoCultivo(estacion.get().getIdTipoCultivo());
             estacionDTO.setDescripcionTipoCultivo(tipoCultivoRepository.findById(estacion.get().getIdTipoCultivo()).get().getNombre());
             estacionDTO.setNumero_Asociados(usuarioEstacionRepository.countByIdEstacion(estacion.get().getId()));
-            String usuarioEncargado = usuarioRepository.findById(estacion.get().getEncargado()).get().getUsuario();
+            String usuarioEncargado = estacion
+                    .map(Estacion::getEncargado)
+                    .filter(Objects::nonNull)
+                    .flatMap(usuarioRepository::findById)
+                    .map(Usuario::getUsuario)
+                    .orElse(null);
             estacionDTO.setUsuarioEncargado(usuarioEncargado);
             return ResponseEntity.ok().body(estacionDTO);
         } catch (Exception e) {
-            System.out.println("Error: "+e.getMessage());
+            System.out.println("Error: " + e.getMessage());
             return ResponseEntity.badRequest().build();
         }
     }
 
     /**
      * Metodo que permite insertar un estacion
+     *
      * @param object estacion
      * @return estacion insertado
      */
@@ -131,13 +143,14 @@ public class EstacionServiceImpl implements EstacionService {
             estacionRepository.save(estacion);
             return ResponseEntity.ok().body(estacion);
         } catch (Exception e) {
-            System.out.println("Error: "+e.getMessage());
+            System.out.println("Error: " + e.getMessage());
             return ResponseEntity.badRequest().build();
         }
     }
 
     /**
      * Metodo que permite actualizar un estacion
+     *
      * @param object estacion
      * @return estacion actualizado
      */
@@ -148,13 +161,14 @@ public class EstacionServiceImpl implements EstacionService {
             estacionRepository.save(estacion);
             return ResponseEntity.ok().body(estacion);
         } catch (Exception e) {
-            System.out.println("Error: "+e.getMessage());
+            System.out.println("Error: " + e.getMessage());
             return ResponseEntity.badRequest().build();
         }
     }
 
     /**
      * Metodo que permite eliminar un estacion
+     *
      * @param id id del estacion
      * @return mensaje de confirmacion
      */
@@ -168,13 +182,14 @@ public class EstacionServiceImpl implements EstacionService {
             estacionRepository.deleteById(estacion.get().getId());
             return ResponseEntity.ok().body(buildMessage("Estacion eliminada"));
         } catch (Exception e) {
-            System.out.println("Error: "+e.getMessage());
+            System.out.println("Error: " + e.getMessage());
             return ResponseEntity.badRequest().build();
         }
     }
 
     /**
      * Metodo que permite obtener las estaciones de un propietario
+     *
      * @param idUsuario id del usuario
      * @return lista de estaciones
      */
@@ -199,14 +214,17 @@ public class EstacionServiceImpl implements EstacionService {
                 estacionDTO.setIdTipoCultivo(estacion.getIdTipoCultivo());
                 estacionDTO.setDescripcionTipoCultivo(tipoCultivoRepository.findById(estacion.getIdTipoCultivo()).get().getNombre());
                 estacionDTO.setNumero_Asociados(usuarioEstacionRepository.countByIdEstacion(estacion.getId()));
-                String usuarioEncargado = usuarioRepository.findById(estacion.getEncargado()).get().getUsuario();
+                String usuarioEncargado = Optional.ofNullable(estacion.getEncargado())
+                        .flatMap(usuarioRepository::findById)
+                        .map(Usuario::getUsuario)
+                        .orElse(null);
                 estacionDTO.setUsuarioEncargado(usuarioEncargado);
                 estacionesDTO.add(estacionDTO);
             }
 
             return ResponseEntity.ok().body(estacionesDTO);
         } catch (Exception e) {
-            System.out.println("Error: "+e.getMessage());
+            System.out.println("Error: " + e.getMessage());
             return ResponseEntity.badRequest().build();
         }
     }
