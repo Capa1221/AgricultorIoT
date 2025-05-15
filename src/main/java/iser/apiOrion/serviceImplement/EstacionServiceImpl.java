@@ -3,6 +3,7 @@ package iser.apiOrion.serviceImplement;
 
 import iser.apiOrion.DTO.EstacionDTO;
 import iser.apiOrion.collection.Estacion;
+import iser.apiOrion.collection.Usuario;
 import iser.apiOrion.repository.EstacionRepository;
 import iser.apiOrion.repository.TipoCultivoRepository;
 import iser.apiOrion.repository.UsuarioEstacionRepository;
@@ -74,7 +75,10 @@ public class EstacionServiceImpl implements EstacionService {
                 descripcionTipoCultivo = tipoCultivoRepository.findById(estacion.getIdTipoCultivo()).get().getNombre();
                 estacionDTO.setDescripcionTipoCultivo((!Objects.equals(descripcionTipoCultivo, "") && descripcionTipoCultivo != null) ? descripcionTipoCultivo : "No se encontro el tipo de cultivo");
                 estacionDTO.setNumero_Asociados(usuarioEstacionRepository.countByIdEstacion(estacion.getId()));
-                String usuarioEncargado = usuarioRepository.findById(estacion.getEncargado()).get().getUsuario();
+                String usuarioEncargado = Optional.ofNullable(estacion.getEncargado())
+                        .flatMap(usuarioRepository::findById)
+                        .map(Usuario::getUsuario)
+                        .orElse(null);
                 estacionDTO.setUsuarioEncargado(usuarioEncargado);
                 estaciones.add(estacionDTO);
             }
@@ -110,7 +114,12 @@ public class EstacionServiceImpl implements EstacionService {
             estacionDTO.setIdTipoCultivo(estacion.get().getIdTipoCultivo());
             estacionDTO.setDescripcionTipoCultivo(tipoCultivoRepository.findById(estacion.get().getIdTipoCultivo()).get().getNombre());
             estacionDTO.setNumero_Asociados(usuarioEstacionRepository.countByIdEstacion(estacion.get().getId()));
-            String usuarioEncargado = usuarioRepository.findById(estacion.get().getEncargado()).get().getUsuario();
+            String usuarioEncargado = estacion
+                    .map(Estacion::getEncargado)
+                    .filter(Objects::nonNull)
+                    .flatMap(usuarioRepository::findById)
+                    .map(Usuario::getUsuario)
+                    .orElse(null);
             estacionDTO.setUsuarioEncargado(usuarioEncargado);
             return ResponseEntity.ok().body(estacionDTO);
         } catch (Exception e) {
