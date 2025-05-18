@@ -120,7 +120,12 @@ public class EstacionServiceImpl implements EstacionService {
             estacionDTO.setDescripcionTipoCultivo(
                     tipoCultivoRepository.findById(estacion.get().getIdTipoCultivo()).get().getNombre());
             estacionDTO.setNumero_Asociados(usuarioEstacionRepository.countByIdEstacion(estacion.get().getId()));
-            String usuarioEncargado = usuarioRepository.findById(estacion.get().getEncargado()).get().getUsuario();
+            String usuarioEncargado = estacion
+                    .map(Estacion::getEncargado)
+                    .filter(Objects::nonNull)
+                    .flatMap(usuarioRepository::findById)
+                    .map(Usuario::getUsuario)
+                    .orElse(null);
             estacionDTO.setUsuarioEncargado(usuarioEncargado);
             return ResponseEntity.ok().body(estacionDTO);
         } catch (Exception e) {
