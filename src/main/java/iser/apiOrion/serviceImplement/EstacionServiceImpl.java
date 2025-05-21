@@ -76,8 +76,9 @@ public class EstacionServiceImpl implements EstacionService {
                 descripcionTipoCultivo = tipoCultivoRepository.findById(estacion.getIdTipoCultivo()).get().getNombre();
                 estacionDTO.setDescripcionTipoCultivo((!Objects.equals(descripcionTipoCultivo, "") && descripcionTipoCultivo != null) ? descripcionTipoCultivo : "No se encontro el tipo de cultivo");
                 estacionDTO.setNumero_Asociados(usuarioEstacionRepository.countByIdEstacion(estacion.getId()));
-                String usuarioEncargado = Optional.ofNullable(estacion.getEncargado())
-                        .flatMap(usuarioRepository::findById)
+                String usuarioEncargado = estacion.getEncargado() == null
+                        ? null
+                        : usuarioRepository.findById(estacion.getEncargado())
                         .map(Usuario::getUsuario)
                         .orElse(null);
                 estacionDTO.setUsuarioEncargado(usuarioEncargado);
@@ -117,9 +118,10 @@ public class EstacionServiceImpl implements EstacionService {
             estacionDTO.setDescripcionTipoCultivo(tipoCultivoRepository.findById(estacion.get().getIdTipoCultivo()).get().getNombre());
             estacionDTO.setNumero_Asociados(usuarioEstacionRepository.countByIdEstacion(estacion.get().getId()));
             String usuarioEncargado = estacion
-                    .map(Estacion::getEncargado)
-                    .filter(Objects::nonNull)
-                    .flatMap(usuarioRepository::findById)
+                    .flatMap(e -> {
+                        if (e.getEncargado() == null) return Optional.empty();
+                        return usuarioRepository.findById(e.getEncargado());
+                    })
                     .map(Usuario::getUsuario)
                     .orElse(null);
             estacionDTO.setUsuarioEncargado(usuarioEncargado);
@@ -214,8 +216,9 @@ public class EstacionServiceImpl implements EstacionService {
                 estacionDTO.setIdTipoCultivo(estacion.getIdTipoCultivo());
                 estacionDTO.setDescripcionTipoCultivo(tipoCultivoRepository.findById(estacion.getIdTipoCultivo()).get().getNombre());
                 estacionDTO.setNumero_Asociados(usuarioEstacionRepository.countByIdEstacion(estacion.getId()));
-                String usuarioEncargado = Optional.ofNullable(estacion.getEncargado())
-                        .flatMap(usuarioRepository::findById)
+                String usuarioEncargado = estacion.getEncargado() == null
+                        ? null
+                        : usuarioRepository.findById(estacion.getEncargado())
                         .map(Usuario::getUsuario)
                         .orElse(null);
                 estacionDTO.setUsuarioEncargado(usuarioEncargado);
