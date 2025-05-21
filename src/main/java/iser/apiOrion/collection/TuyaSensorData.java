@@ -14,7 +14,7 @@ public class TuyaSensorData {
     @Id
     private String id; // ID automático generado en BD
     private String nombre; //nombre del sensor, como "Sensor Tuya"
-
+ 
     private Double ph;
     private Double orp;
     private Double ec;
