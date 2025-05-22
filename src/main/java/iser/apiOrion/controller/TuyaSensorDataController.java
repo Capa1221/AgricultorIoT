@@ -30,14 +30,17 @@ public class TuyaSensorDataController {
             @ApiResponse(responseCode = "200", description = "Datos obtenidos y guardados exitosamente"),
             @ApiResponse(responseCode = "500", description = "Error al obtener o guardar datos del sensor Tuya")
     })
-    @PostMapping("/fetch-and-save")
-    public ResponseEntity<TuyaSensorData> fetchAndSave() {
-        TuyaSensorData savedData = service.saveSensorData();
-        if (savedData != null) {
-            return ResponseEntity.ok(savedData);
-        }
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+
+    
+   @PostMapping("/fetch-and-save")
+   public ResponseEntity<TuyaSensorData> fetchAndSave() {
+    TuyaSensorData savedData = service.saveSensorData();
+    if (savedData != null) {
+        return ResponseEntity.ok(savedData);
     }
+    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+}
+
 
     // Endpoint para insertar datos manualmente (si aún lo necesitas)
     // Nota: Si este endpoint ya no se usar para datos manuales, puedes eliminarlo.

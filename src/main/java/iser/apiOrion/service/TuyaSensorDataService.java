@@ -24,7 +24,7 @@ public class TuyaSensorDataService {
 
     public TuyaSensorData saveSensorData() {
         try {
-            String url = "http://localhost:5173/api/tuya";
+            String url = "https://openapi.tuyaus.com/v1.0/devices/eb26e4bec4d34ee3bfg21n/status";
             ObjectMapper mapper = new ObjectMapper();
             JsonNode response = mapper.readTree(restTemplate.getForObject(url, String.class));
 
@@ -99,6 +99,9 @@ public class TuyaSensorDataService {
         return false;
     }
 }
+
+
+
 
 
 
