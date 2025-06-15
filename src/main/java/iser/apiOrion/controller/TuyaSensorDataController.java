@@ -37,6 +37,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping(value = "/api/v1/tuya", produces = MediaType.APPLICATION_JSON_VALUE)
 @Tag(name = "Tuya Sensor Híbrido", description = "API reducida para solo temperatura")
+@CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
 public class TuyaSensorDataController {
 
     @Autowired
