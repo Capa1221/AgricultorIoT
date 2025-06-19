@@ -17,37 +17,18 @@ import java.util.Enumeration;
 @Service
 public class CustomFilter extends OncePerRequestFilter {
 
-    /**
-     * Proveedor de token JWT
-     */
     @Autowired
     private JwtTokenProvider jwtTokenProvider;
 
-    /**
-     * URI de la solicitud para insertar datos
-     */
     @Value("${valida.insertar-datos.requestURI.igual-noToken:total-lock}")
     private String insertarDatosRequestURI;
 
-    /**
-     * Clave para validar los datos
-     */
     @Value("${clave.valida.datos:total-lock}")
     private String claveValidaDatos;
 
-    /**
-     * Metodo que permite filtrar las peticiones
-     * @param request peticion http
-     * @param response respuesta http
-     * @param chain cadena de filtros
-     * @throws IOException excepcion de entrada y salida
-     * @throws ServletException excepcion de servlet
-     */
     @Override
-    public void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
-        //response.setHeader("Access-Control-Allow-Origin", "*");
-        //response.setHeader("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE, OPTIONS");
-        //response.setHeader("Access-Control-Max-Age", "3600");
+    public void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
+            throws IOException, ServletException {
 
         response.setHeader("Access-Control-Allow-Origin", "*");
         response.setHeader("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE");
@@ -55,13 +36,13 @@ public class CustomFilter extends OncePerRequestFilter {
         response.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
 
         // Manejar solicitudes OPTIONS (preflight)
-        if (request.getMethod().equals("OPTIONS")) {
+        if (request.getMethod().equalsIgnoreCase("OPTIONS")) {
             response.setStatus(HttpServletResponse.SC_OK);
             return;
         }
 
+        // Mostrar headers para depuración
         System.out.println("---------------------------------------------------------");
-
         Enumeration<String> headerNames = request.getHeaderNames();
         while (headerNames.hasMoreElements()) {
             String headerName = headerNames.nextElement();
@@ -69,38 +50,35 @@ public class CustomFilter extends OncePerRequestFilter {
         }
         System.out.println("---------------------------------------------------------");
 
-        // Handle CORS preflight requests
-        System.out.println(" Request Headers (Authorization): " + request.getHeader("authorization"));
+        System.out.println("Request Headers (Authorization): " + request.getHeader("Authorization"));
         System.out.println("Request Method: " + request.getMethod());
+        System.out.println("Origin: " + request.getHeader("Origin"));
+        System.out.println("URI: " + request.getRequestURI());
+        System.out.println("¿No requiere token? " + this.jwtTokenProvider.requestURINoToken(request.getRequestURI()));
 
-        // Print specific information
-        System.out.println(" Origin: " + request.getHeader("Origin"));
-        System.out.println(" Request Headers (Authorization): " + request.getHeader("Authorization"));
-        System.out.println(" URI: " + request.getRequestURI());
-        System.out.println(" NO Requieres token? " + this.jwtTokenProvider.requestURINoToken(request.getRequestURI()));
+        boolean isNoTokenURI = this.jwtTokenProvider.requestURINoToken(request.getRequestURI());
+        boolean isInsertarDatosValid = request.getRequestURI().equals(insertarDatosRequestURI)
+                && claveValidaDatos.equals(request.getHeader("clave"));
 
-        /*if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
-            System.out.println("Handling CORS preflight request");
-            response.setStatus(HttpServletResponse.SC_OK);
-            return;
-        }*/
-
-        if (this.jwtTokenProvider.requestURINoToken(request.getRequestURI()) || (request.getRequestURI().equals(insertarDatosRequestURI) && request.getHeader("clave").equals(claveValidaDatos))) {
+        if (isNoTokenURI || isInsertarDatosValid) {
             System.out.println("No requiere token");
             chain.doFilter(request, response);
         } else {
             System.out.println("Requiere token");
 
             String token = this.jwtTokenProvider.extractToken(request);
-
             TokenValidationResult validationResult = this.jwtTokenProvider.resolveToken(token);
+
             if (validationResult.isValid()) {
-                System.out.println("Token valido");
-                response.addHeader("Authorization", jwtTokenProvider.createToken(this.jwtTokenProvider.getSubject(token), validationResult.getClaims().get("idUsuario").toString()));
+                System.out.println("Token válido");
+                response.addHeader("Authorization", jwtTokenProvider.createToken(
+                        this.jwtTokenProvider.getSubject(token),
+                        validationResult.getClaims().get("idUsuario").toString()
+                ));
                 response.addHeader("Access-Control-Expose-Headers", "Authorization");
                 chain.doFilter(request, response);
             } else {
-                System.out.println("Token invalido: " + validationResult.getMessage());
+                System.out.println("Token inválido: " + validationResult.getMessage());
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED, validationResult.getMessage());
             }
         }
