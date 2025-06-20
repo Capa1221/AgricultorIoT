@@ -54,12 +54,12 @@ public class DatosController {
     )
     public ResponseEntity<?> rangoFechasPorSensor(
       @RequestParam("fechaInicial") String fechaInicial,
-      @RequestParam("fechaFinal")   String fechaFinal,
+      @RequestParam("fechaFinal")   String fechafinal,
       @RequestParam("idSensor")     String idSensor
     ) throws ParseException {
         SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
         Date inicio = fmt.parse(fechaInicial);
-        Date fin    = fmt.parse(fechaFinal);
+        Date fin    = fmt.parse(fechafinal);
         return datosService.rangofecha(inicio, fin, idSensor);
     }
 
